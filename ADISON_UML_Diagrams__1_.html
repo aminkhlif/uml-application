@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADISON — Diagrammes UML · Tous Sprints</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800&family=Share+Tech+Mono&family=Inter:wght@300;400;600;700&display=swap');
+
+:root {
+  --bg:      #030A14;
+  --surf:    #060F1C;
+  --surf2:   #0A1628;
+  --surf3:   #0D1F38;
+  --gold:    #00C8FF;
+  --gold-dim:#005A7A;
+  --blue:    #0080CC;
+  --blue-lt: #00C8FF;
+  --green:   #00E676;
+  --red:     #FF3B3B;
+  --purple:  #B388FF;
+  --amber:   #FFB300;
+  --text:    #C8E8FF;
+  --text-dim:#2A5070;
+  --border:  #0A2040;
+  --border-lt:#153060;
+  --r:       6px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-size: 13px;
+  background-image:
+    linear-gradient(rgba(0,200,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,200,255,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ─── HEADER ─── */
+.header {
+  background: var(--surf);
+  border-bottom: 1px solid rgba(0,200,255,0.12);
+  padding: 0 24px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+  position: relative;
+}
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0.2;
+}
+
+.logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 4px;
+  text-shadow: 0 0 16px rgba(0,200,255,0.4);
+}
+.logo-sub {
+  font-size: 9px;
+  color: rgba(0,200,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 300;
+  font-family: 'Share Tech Mono', monospace;
+}
+.h-div {
+  width: 1px;
+  height: 28px;
+  background: rgba(0,200,255,0.1);
+  margin: 0 4px;
+}
+.header-badge {
+  margin-left: auto;
+  font-size: 9px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(0,200,255,0.25);
+  color: var(--gold);
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  font-family: 'Share Tech Mono', monospace;
+  background: rgba(0,200,255,0.05);
+}
+.diag-count {
+  font-size: 10px;
+  color: rgba(0,200,255,0.3);
+  margin-left: 8px;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* ─── APP LAYOUT ─── */
+.app { display:flex; flex:1; overflow:hidden; }
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width: 236px;
+  background: var(--surf);
+  border-right: 1px solid rgba(0,200,255,0.08);
+  overflow-y: auto;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.sidebar::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 1px; height: 100%;
+  background: linear-gradient(180deg, transparent, rgba(0,200,255,0.15), transparent);
+}
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(0,200,255,0.15); border-radius: 3px; }
+
+.sb-section {
+  padding: 14px 14px 6px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Share Tech Mono', monospace;
+}
+.sb-section::after { content:''; flex:1; height:1px; background:rgba(0,200,255,0.08); }
+
+.s-conception { color: rgba(0,200,255,0.3); }
+.s-s1         { color: #00C8FF; }
+.s-s2         { color: #00E676; }
+.s-s3         { color: #FFB300; }
+.s-s4         { color: #B388FF; }
+
+.diag-item {
+  padding: 9px 14px 9px 16px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all .18s;
+  color: rgba(0,150,200,0.4);
+}
+.diag-item:hover {
+  background: rgba(0,200,255,0.04);
+  color: var(--text);
+  border-left-color: rgba(0,200,255,0.3);
+}
+.diag-item.active {
+  background: rgba(0,200,255,0.06);
+  color: var(--text);
+  border-left-color: var(--gold);
+  box-shadow: inset 0 0 20px rgba(0,200,255,0.03);
+}
+.diag-item .d-name {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 3px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+}
+.diag-item .d-fig {
+  font-size: 9px;
+  color: rgba(0,200,255,0.3);
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 8px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  margin-left: 5px;
+  vertical-align: middle;
+  font-family: 'Share Tech Mono', monospace;
+}
+.tag-uc  { background: rgba(0,200,255,.1);  color: var(--blue-lt);  border:1px solid rgba(0,200,255,.2); }
+.tag-cls { background: rgba(0,230,118,.08); color: var(--green);    border:1px solid rgba(0,230,118,.2); }
+.tag-seq { background: rgba(255,179,0,.08); color: var(--amber);    border:1px solid rgba(255,179,0,.2); }
+
+.sb-footer {
+  margin-top: auto;
+  padding: 12px 14px;
+  border-top: 1px solid rgba(0,200,255,0.08);
+  font-size: 10px;
+  color: rgba(0,200,255,0.3);
+  line-height: 1.7;
+  font-family: 'Share Tech Mono', monospace;
+}
+.sb-footer strong {
+  color: var(--gold);
+  display: block;
+  margin-bottom: 3px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+/* ─── MAIN ─── */
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+/* ─── TOOLBAR ─── */
+.toolbar {
+  background: var(--surf);
+  border-bottom: 1px solid rgba(0,200,255,0.08);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.tb-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 1px;
+}
+.tb-type {
+  font-size: 9px;
+  color: rgba(0,200,255,0.35);
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* ─── BUTTONS ─── */
+.btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  transition: all .18s;
+  text-transform: uppercase;
+}
+.btn-gold {
+  background: rgba(0,200,255,0.12);
+  color: var(--gold);
+  border: 1px solid rgba(0,200,255,0.3);
+}
+.btn-gold:hover {
+  background: rgba(0,200,255,0.2);
+  box-shadow: 0 0 12px rgba(0,200,255,0.2);
+}
+.btn-ghost {
+  background: transparent;
+  color: rgba(0,200,255,0.35);
+  border: 1px solid rgba(0,200,255,0.1);
+}
+.btn-ghost:hover {
+  color: var(--text);
+  border-color: rgba(0,200,255,0.25);
+}
+.btn-icon { padding: 6px 10px; font-size: 13px; }
+.btn-toggle {
+  background: rgba(0,200,255,0.05);
+  color: rgba(0,200,255,0.5);
+  border: 1px solid rgba(0,200,255,0.15);
+}
+.btn-toggle:hover { background: rgba(0,200,255,0.1); color: var(--gold); }
+.btn-toggle.active {
+  background: rgba(0,200,255,0.12);
+  color: var(--gold);
+  border-color: rgba(0,200,255,0.35);
+  box-shadow: 0 0 10px rgba(0,200,255,0.15);
+}
+
+/* ─── SPRINT ACCENTS ─── */
+.sprint-accent {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+.sa-conception { background: rgba(0,200,255,0.3); }
+.sa-s1         { background: #00C8FF; box-shadow:0 0 6px #00C8FF; }
+.sa-s2         { background: #00E676; box-shadow:0 0 6px #00E676; }
+.sa-s3         { background: #FFB300; box-shadow:0 0 6px #FFB300; }
+.sa-s4         { background: #B388FF; box-shadow:0 0 6px #B388FF; }
+
+/* ─── DIAGRAM VIEW ─── */
+.diag-view {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 28px;
+  background: var(--bg);
+}
+.diag-view::-webkit-scrollbar { width:5px; height:5px; }
+.diag-view::-webkit-scrollbar-thumb { background:rgba(0,200,255,0.15); border-radius:3px; }
+
+.diag-card {
+  background: var(--surf);
+  border: 1px solid rgba(0,200,255,0.1);
+  border-radius: var(--r);
+  padding: 28px 32px;
+  max-width: 100%;
+  min-width: 480px;
+  box-shadow: 0 0 60px rgba(0,10,30,0.8), inset 0 0 40px rgba(0,200,255,0.02);
+  position: relative;
+}
+.diag-card::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 20%; right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0.4;
+}
+
+.diag-card-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  color: var(--gold);
+  text-align: center;
+  letter-spacing: 2px;
+  padding-bottom: 14px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(0,200,255,0.1);
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(0,200,255,0.3);
+}
+
+#diag-output {
+  display: flex;
+  justify-content: center;
+  min-height: 200px;
+  align-items: center;
+}
+#diag-output img {
+  max-width: 100%;
+  border-radius: 4px;
+  transition: transform .2s;
+}
+
+/* ─── SPINNER / LOADING ─── */
+.spinner {
+  width: 28px; height: 28px;
+  border: 1px solid rgba(0,200,255,0.1);
+  border-top-color: var(--gold);
+  border-right-color: rgba(0,200,255,0.4);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+#loading {
+  color: rgba(0,200,255,0.3);
+  font-size: 12px;
+  padding: 48px;
+  text-align: center;
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 1px;
+}
+
+.err-msg {
+  color: var(--red);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  padding: 12px 16px;
+  background: rgba(255,59,59,0.06);
+  border-radius: 4px;
+  border-left: 2px solid var(--red);
+  white-space: pre-wrap;
+}
+
+/* ─── EDITOR PANEL ─── */
+.editor-panel {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid rgba(0,200,255,0.08);
+  flex-shrink: 0;
+  height: 0;
+  overflow: hidden;
+  transition: height .25s cubic-bezier(.4,0,.2,1);
+}
+.editor-panel.open { height: 230px; }
+
+.editor-hdr {
+  background: var(--surf2);
+  border-bottom: 1px solid rgba(0,200,255,0.08);
+  padding: 7px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.editor-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  flex: 1;
+  font-family: 'Share Tech Mono', monospace;
+}
+.dot { width:7px; height:7px; border-radius:50%; }
+.dot-r { background: var(--red);   box-shadow: 0 0 5px var(--red); }
+.dot-g { background: var(--green); box-shadow: 0 0 5px var(--green); }
+.dot-y { background: var(--amber); box-shadow: 0 0 5px var(--amber); }
+
+textarea#editor {
+  flex: 1;
+  background: #020810;
+  color: #00C8FF;
+  border: none;
+  padding: 12px 16px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.65;
+  resize: none;
+  outline: none;
+  tab-size: 2;
+  caret-color: var(--gold);
+}
+textarea#editor::selection { background: rgba(0,200,255,0.15); }
+textarea#editor::-webkit-scrollbar { width: 3px; }
+textarea#editor::-webkit-scrollbar-thumb { background: rgba(0,200,255,0.15); border-radius:3px; }
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed;
+  bottom: 16px; right: 16px;
+  background: var(--surf3);
+  border: 1px solid rgba(0,200,255,0.2);
+  border-radius: 5px;
+  padding: 8px 14px;
+  font-size: 10px;
+  color: var(--gold);
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 0.5px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
+  z-index: 200;
+  box-shadow: 0 0 20px rgba(0,200,255,0.1);
+}
+.toast.show { opacity: 1; }
+
+/* ─── FULLSCREEN ─── */
+#fs-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  z-index: 9999;
+  background: #030A14;
+  flex-direction: column;
+  background-image:
+    linear-gradient(rgba(0,200,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,200,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+#fs-overlay.open { display: flex; }
+
+#fs-toolbar {
+  background: var(--surf);
+  border-bottom: 1px solid rgba(0,200,255,0.1);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+#fs-view {
+  flex: 1; overflow: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 32px;
+}
+#fs-view::-webkit-scrollbar { width:5px; height:5px; }
+#fs-view::-webkit-scrollbar-thumb { background:rgba(0,200,255,0.15); border-radius:3px; }
+
+#fs-card {
+  background: var(--surf);
+  border: 1px solid rgba(0,200,255,0.12);
+  border-radius: var(--r);
+  padding: 32px 40px;
+  box-shadow: 0 0 80px rgba(0,10,30,0.9), inset 0 0 40px rgba(0,200,255,0.02);
+  max-width: 100%;
+  position: relative;
+}
+#fs-card::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 25%; right: 25%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #00C8FF, transparent);
+  opacity: 0.35;
+}
+
+#fs-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  color: var(--gold);
+  text-align: center;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding-bottom: 14px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid rgba(0,200,255,0.1);
+  text-shadow: 0 0 12px rgba(0,200,255,0.3);
+}
+#fs-output { display:flex; justify-content:center; min-height:200px; align-items:center; }
+#fs-output img { max-width:100%; border-radius:4px; transition:transform .2s; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="logo">ADISON</span>
+  <div class="h-div"></div>
+  <span class="logo-sub">Diagrammes UML — Génie Logiciel · Tous Sprints</span>
+  <span class="header-badge">PlantUML · Éditable</span>
+  <span class="diag-count" id="diag-count"></span>
+</div>
+
+<div class="app">
+<aside class="sidebar">
+  <div class="sb-section s-conception">Conception générale</div>
+  <div class="diag-item active" onclick="loadDiagram(0)">
+    <div class="d-name">Cas d'utilisation général<span class="tag tag-uc">UC</span></div>
+    <div class="d-fig">Fig. 2.1</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(1)">
+    <div class="d-name">Classes métier<span class="tag tag-cls">CLS</span></div>
+    <div class="d-fig">Fig. 2.2</div>
+  </div>
+  <div class="sb-section s-s1">Sprint 1 ·Sécuriser l’accès + premières opérations</div>
+  <div class="diag-item" onclick="loadDiagram(2)">
+    <div class="d-name">Cas d'utilisation raffiné<span class="tag tag-uc">UC</span></div>
+    <div class="d-fig">Fig. 6.2</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(3)">
+    <div class="d-name">Classes raffinées<span class="tag tag-cls">CLS</span></div>
+    <div class="d-fig">Fig. 6.3</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(4)">
+    <div class="d-name">Séquence — S'authentifier<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">Fig. 6.4</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(5)">
+    <div class="d-name">Annulation des réservations non payées <span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">Fig. 6.5</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(6)">
+    <div class="d-name">Affectation d’un avion<span class="tag tag-uc">SEQ</span></div>
+    <div class="d-fig">Fig. 6.6</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(7)">
+    <div class="d-name">Affectation des comptoirs<span class="tag tag-uc">SEQ</span></div>
+    <div class="d-fig">Fig. 6.7</div>
+  </div>
+    <div class="diag-item" onclick="loadDiagram(8)">
+    <div class="d-name">Démarrage de l’enregistrement <span class="tag tag-uc">SEQ</span></div>
+    <div class="d-fig">Fig. 6.8</div>
+  </div>
+  <div class="sb-section s-s2">Sprint 2 · Gestion ressources humaines + organisation</div>
+  <div class="diag-item" onclick="loadDiagram(9)">
+    <div class="d-name">Cas d'utilisation raffiné<span class="tag tag-uc">UC</span></div>
+    <div class="d-fig">Sprint 2</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(10)">
+    <div class="d-name">Classes raffinées<span class="tag tag-cls">CLS</span></div>
+    <div class="d-fig">Sprint 2</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(11)">
+    <div class="d-name">Séquence — Gestion de la liste d’attente<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">Sprint 2</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(12)">
+    <div class="d-name">Séquence —Affectation équipage<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">Sprint 2</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(13)">
+    <div class="d-name">Séquence —Affectation agents de comptoir<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">Sprint 2</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(14)">
+    <div class="d-name">Séquence — Notification des parties<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">Sprint 2</div>
+  </div>
+  <div class="sb-section s-s3">Sprint 3 · Cœur métier (check-in passager)</div>
+  <div class="diag-item" onclick="loadDiagram(15)">
+    <div class="d-name">Cas d'utilisation raffiné<span class="tag tag-uc">UC</span></div>
+    <div class="d-fig">Sprint 3</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(16)">
+    <div class="d-name">Classes raffinées<span class="tag tag-cls">CLS</span></div>
+    <div class="d-fig">Sprint 3</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(17)">
+    <div class="d-name">Séquence — Vérification des documents<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">Sprint 3</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(18)">
+    <div class="d-name">Séquence — Vérification présence sur liste<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">Sprint 3</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(19)">
+    <div class="d-name">Séquence — Affectation d’un siège<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">Sprint 3</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(20)">
+    <div class="d-name">Séquence — Génération carte d’embarquement<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">US-405</div>
+  </div>
+  <div class="sb-section s-s4">Sprint 4 · Gestion logistique + visibilité</div>
+  <div class="diag-item" onclick="loadDiagram(21)">
+    <div class="d-name">Cas d'utilisation raffiné<span class="tag tag-uc">UC</span></div>
+    <div class="d-fig">Sprint 4</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(22)">
+    <div class="d-name">Classes raffinées<span class="tag tag-cls">CLS</span></div>
+    <div class="d-fig">Sprint 4</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(23)">
+    <div class="d-name">Séquence — Pesée des bagages<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">Sprint 4</div>
+  </div>
+   <div class="diag-item" onclick="loadDiagram(24)">
+    <div class="d-name">Séquence — Génération étiquette bagage<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">Sprint 4</div>
+  </div>
+   <div class="diag-item" onclick="loadDiagram(25)">
+    <div class="d-name">Séquence — Acheminement bagages<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">Sprint 4</div>
+  </div>
+   <div class="diag-item" onclick="loadDiagram(26)">
+    <div class="d-name">Séquence — Affichage des comptoirs<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">Sprint 4</div>
+  </div>
+   <div class="diag-item" onclick="loadDiagram(27)">
+    <div class="d-name">Séquence — Évaluation des passagers<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">Sprint 4</div>
+  </div>
+  <div class="sb-section s-s1">sprint 5 . Optimisation finale avant départ</div>
+  <div class="diag-item" onclick="loadDiagram(28)">
+    <div class="d-name">Cas d'utilisation raffiné<span class="tag tag-uc">UC</span></div>
+    <div class="d-fig">sprint 5</div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(29)">
+    <div class="d-name">Classes raffinée<span class="tag tag-cls">UC</span></div>
+    <div class="d-fig">sprint 5 </div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(30)">
+    <div class="d-name">Admission liste d’attente<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">sprint 5 </div>
+  </div>
+  <div class="diag-item" onclick="loadDiagram(31)">
+    <div class="d-name">Attribution des places<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">sprint 5 </div>
+  </div>
+ <div class="diag-item" onclick="loadDiagram(32)">
+    <div class="d-name">Mise à jour des passagers<span class="tag tag-seq">SEQ</span></div>
+    <div class="d-fig">sprint 5 </div>
+  </div>
+    
+  <div class="sb-footer">
+    <strong>📐 ADISON UML · PlantUML</strong>
+    Naviguez · <strong>✏️ Éditeur</strong> pour modifier<br>
+    <strong>▶ Rendu</strong> pour mettre à jour (Ctrl+↵)<br>
+    <strong>⛶</strong> Plein écran · <strong>↓ PNG</strong> Export
+  </div>
+</aside>
+
+<div class="main">
+  <div class="toolbar">
+    <div style="display:flex;align-items:center;flex:1;">
+      <span class="sprint-accent" id="tb-dot"></span>
+      <div>
+        <div class="tb-title" id="tb-title">—</div>
+        <div class="tb-type" id="tb-type">—</div>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-icon" onclick="zoomOut()" title="Zoom −">−</button>
+    <button class="btn btn-ghost btn-icon" onclick="zoomIn()"  title="Zoom +">+</button>
+    <button class="btn btn-ghost btn-icon" onclick="zoomReset()" title="Reset zoom">⊙</button>
+    <button class="btn btn-ghost" onclick="exportPNG(false)">↓ PNG</button>
+    <button class="btn btn-toggle" id="editor-btn" onclick="toggleEditor()">✏️ Éditeur</button>
+    <button class="btn btn-gold" onclick="openFullscreen()">⛶ Plein écran</button>
+  </div>
+
+  <div class="diag-view">
+    <div class="diag-card">
+      <div class="diag-card-title" id="diag-card-title"></div>
+      <div id="diag-output"><div id="loading"><div class="spinner"></div>Chargement…</div></div>
+    </div>
+  </div>
+
+  <div class="editor-panel" id="editor-panel">
+    <div class="editor-hdr">
+      <div style="display:flex;gap:5px;align-items:center;">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+      </div>
+      <span class="editor-label">✏️ Éditeur PlantUML</span>
+      <button class="btn btn-ghost" style="font-size:10px;" onclick="resetDiagram()">Réinitialiser</button>
+      <button class="btn btn-ghost" style="font-size:10px;" onclick="copyCode()">Copier</button>
+      <button class="btn btn-gold" onclick="renderEditor()">▶ Rendu</button>
+    </div>
+    <textarea id="editor" spellcheck="false" placeholder="@startuml&#10;...&#10;@enduml"></textarea>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div id="fs-overlay">
+  <div id="fs-toolbar">
+    <span class="sprint-accent" id="fs-dot"></span>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:600;color:var(--text)" id="fs-label">—</div>
+      <div style="font-size:10px;color:var(--text-dim)" id="fs-sub">—</div>
+    </div>
+    <button class="btn btn-ghost btn-icon" onclick="fszoomOut()">−</button>
+    <button class="btn btn-ghost btn-icon" onclick="fszoomIn()">+</button>
+    <button class="btn btn-ghost btn-icon" onclick="fszoomReset()">⊙</button>
+    <button class="btn btn-ghost" onclick="exportPNG(true)">↓ PNG</button>
+    <button class="btn btn-gold" onclick="closeFullscreen()">✕ Fermer</button>
+  </div>
+  <div id="fs-view">
+    <div id="fs-card">
+      <div id="fs-title"></div>
+      <div id="fs-output"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── PLANTUML ENCODER ── */
+const B64='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
+function encode64c(b){
+  let r='';
+  for(let i=0;i<b.length;i+=3){
+    const a=b[i],bb=b[i+1]??0,c=b[i+2]??0;
+    r+=B64[a>>2]+B64[((a&3)<<4)|(bb>>4)]+B64[((bb&15)<<2)|(c>>6)]+B64[c&63];
+  }
+  return r;
+}
+function pumlURL(src){
+  const enc=new TextEncoder().encode(src);
+  const d=pako.deflateRaw(enc,{level:9});
+  return'https://www.plantuml.com/plantuml/png/'+encode64c(d);
+}
+
+/* ── DIAGRAMS ── */
+const D=[
+{sprint:'conception',title:"Cas d'utilisation général",sub:"Use Case · Fig. 2.1",card:"CAS D'UTILISATION GÉNÉRAL",code:`
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+' ===================== ACTEURS =====================
+actor "Service de planification" as Planification
+actor "Agent de comptoir" as Agent
+actor "Passager" as Passager
+actor "Système externe (Affichage)" as SystemeAffichage
+
+' ===================== SYSTEME =====================
+rectangle "Système de gestion des départs de vols" {
+
+  ' ================= PLANIFICATION =================
+  package "Planification des vols (T-48h)" {
+
+    (Annuler réservations non payées) as UC1
+    (Gérer liste d’attente) as UC2
+    (Affecter avion) as UC3
+    (Affecter équipage) as UC4
+    (Affecter comptoirs) as UC5
+    (Affecter agents de comptoir) as UC6
+    (Évaluer passagers par type et classe) as UC7
+    (Notifier les parties concernées) as UC8
+
+    UC1 --> UC2 : <<include>>
+  }
+
+  ' ================= ENREGISTREMENT =================
+  package "Enregistrement des passagers (T-2h)" {
+
+    (Démarrer enregistrement) as UC9
+    (Afficher comptoirs) as UC10
+    (Vérifier documents passager) as UC11
+    (Vérifier présence sur liste) as UC12
+    (Affecter siège) as UC13
+    (Éditer carte d’embarquement) as UC14
+
+    (Peser bagages) as UC15
+    (Éditer étiquettes bagages) as UC16
+    (Acheminer bagages) as UC17
+
+    UC9 --> UC10 : <<include>>
+    UC11 --> UC12 : <<include>>
+    UC13 --> UC14 : <<include>>
+    UC15 --> UC16 : <<include>>
+    UC16 --> UC17 : <<include>>
+  }
+
+  ' ================= LISTE D’ATTENTE =================
+  package "Gestion liste d’attente (T-30min)" {
+
+    (Admettre passagers liste d’attente) as UC18
+    (Attribuer places disponibles) as UC19
+
+    UC18 --> UC19 : <<include>>
+    UC18 --> UC13 : <<include>>
+    UC18 --> UC14 : <<include>>
+  }
+
+}
+
+' ===================== ACTEURS =====================
+
+Planification --> UC1
+Planification --> UC3
+Planification --> UC4
+Planification --> UC5
+Planification --> UC6
+Planification --> UC7
+Planification --> UC8
+
+Agent --> UC9
+Agent --> UC11
+Agent --> UC13
+Agent --> UC15
+Agent --> UC17
+
+Passager --> UC11
+Passager --> UC15
+
+SystemeAffichage --> UC10
+
+@enduml
+`},
+
+{sprint:'conception',title:"Classes métier",sub:"Class Diagram · Fig. 2.2",card:"DIAGRAMME DE CLASSES MÉTIER",code:`
+@startuml
+
+' ===================== ENUMS =====================
+enum StatutComptoir {
+  Ouvert
+  Ferme
+}
+
+enum StatutReservation {
+  Confirmee
+  En_attente
+  Annulee
+}
+
+enum TypePassager {
+  Adulte
+  Enfant
+  Bebe
+}
+
+enum StatutDisponibilite {
+  disponible
+  indisponible
+}
+
+enum RoleMembreEquipage {
+  Pilote
+  Hotesse
+  Copilote
+  Agent_de_bord
+}
+
+' ===================== CLASSES =====================
+
+class SystemeAffichage {
+  +afficherComptoir()
+}
+
+class Comptoir {
+  +idComptoir : String
+  +statut : StatutComptoir
+  +identifiants : String
+  +modifierStatutComptoir()
+}
+
+class Reservation {
+  +idReservation : String
+  +statut : StatutReservation
+  +dateReservation : Date
+  +annulerReservation()
+  +confirmerReservation()
+}
+
+class Agent {
+  +idAgent : String
+  +nom : String
+}
+
+class Billet {
+  +idBillet : String
+  +numeroSiege : String
+  +porteEmbarquement : String
+  +genererCarteEmbarquement()
+}
+
+class Passager {
+  +idPassager : String
+  +nom : String
+  +type : TypePassager
+  +classe : String
+  +siege : String
+}
+
+class Bagage {
+  +idBagage : String
+  +poids : double
+}
+
+class Vol {
+  +idVol : String
+  +dateDepart : LocalDateTime
+  +dateArrivee : LocalDateTime
+  +destination : String
+  +origine : String
+  +statut : String
+}
+
+class Avion {
+  +idAvion : String
+  +modele : String
+  +capacite : int
+}
+
+class Equipage {
+  +idEquipage : String
+}
+
+class MembreEquipage {
+  +idMembre : String
+  +nom : String
+  +role : RoleMembreEquipage
+  +statutDisponibilite : StatutDisponibilite
+}
+
+class ServicePlanification {
+  +affecterComptoir()
+}
+
+' ===================== RELATIONS =====================
+
+Comptoir --> SystemeAffichage : met à jour
+Agent --> Comptoir : affecté à
+Agent --> Reservation : gère
+
+Reservation "0..*" --> "1" Vol : utilise
+Reservation --> Billet : génère
+Reservation --> Passager : lié à
+
+Passager "1" *-- "0..*" Bagage : possède
+
+Vol --> Avion : affectation
+Vol o-- Equipage : affectation
+Equipage *-- "1..*" MembreEquipage : contient
+
+ServicePlanification --> Vol
+ServicePlanification --> Comptoir
+
+' ===================== LIENS ENUM =====================
+
+Comptoir ..> StatutComptoir
+Reservation ..> StatutReservation
+Passager ..> TypePassager
+MembreEquipage ..> RoleMembreEquipage
+MembreEquipage ..> StatutDisponibilite
+
+' ===================== NOTES =====================
+
+note right of Vol
+durée = dateArrivee - dateDepart
+end note
+
+note right of ServicePlanification
+HeureEnregistrement = heureDepart - 12h
+end note
+
+note right of Vol
+planification <= dateDepart - 48h
+end note
+
+note bottom of Reservation
+heureDepart >= HeureEnregistrement
+end note
+
+@enduml
+`},
+
+{sprint:'s1',title:"UC raffiné — Sprint 1",sub:"Use Case · Fig. 6.2",card:"UC RAFFINÉ — Sécuriser l’accès + premières opérations critiques(SPRINT 1)",code:`
+@startuml
+left to right direction
+
+actor "Utilisateur" as User
+
+rectangle "Sprint 1 - Système" {
+
+  (S'authentifier) as UC1
+  (Annuler réservations non payées) as UC2
+  (Affecter avion) as UC3
+  (Affecter comptoir) as UC4
+  (Démarrer enregistrement) as UC5
+
+  UC2 --> UC3 : <<include>>
+}
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+
+@enduml
+`},
+
+{sprint:'s1',title:"Classes raffinées — Sprint 1",sub:"Class Diagram · Fig. 6.3",card:"CLASSES RAFFINÉES — SPRINT 1",code:`
+@startuml
+
+class Utilisateur {
+  id
+  login
+  motDePasse
+  role
+}
+
+class AuthService {
+  +authentifier()
+  +verifierMotDePasse()
+}
+
+class UserRepository {
+  +findUser()
+}
+
+class Reservation {
+  id
+  statut
+  date
+}
+
+class Vol {
+  id
+  statut
+}
+
+class Avion {
+  id
+  modele
+}
+
+class Comptoir {
+  id
+  statut
+}
+
+' ===================== RELATIONS =====================
+
+' Authentification
+AuthService "1" --> "1" UserRepository : utilise
+UserRepository "1" --> "0..*" Utilisateur : gère
+
+' Réservation - Vol
+Reservation "0..*" --> "1" Vol : concerne
+
+' Vol - Avion
+Vol "1" --> "1" Avion : affecté à
+
+' Vol - Comptoir
+Vol "1" --> "1..*" Comptoir : utilise
+
+@enduml
+`},
+
+{sprint:'s1',title:"Séquence — S'authentifier",sub:"Sequence · Fig. 6.4",card:"SÉQUENCE — S'AUTHENTIFIER (US-101/102/103)",code:`
+@startuml
+actor Utilisateur
+participant IHM
+participant AuthService
+participant UserRepository
+database DB
+
+Utilisateur -> IHM : saisir identifiants
+IHM -> AuthService : authentifier(login, mdp)
+AuthService -> UserRepository : findUser(login)
+UserRepository -> DB : SELECT user
+DB --> UserRepository : user
+
+AuthService -> AuthService : vérifier mot de passe
+
+alt succès
+  AuthService --> IHM : token
+  IHM --> Utilisateur : accès autorisé
+else échec
+  AuthService --> IHM : erreur
+  IHM --> Utilisateur : accès refusé
+end
+@enduml 
+ 
+`},
+//------------------------------------------------------------------------------------------
+{sprint:'s1',title:"Séquence — Confirmer réservation",sub:"Sequence · Fig. 6.5",card:"SÉQUENCE —nnulation des réservations non payées ",code:`
+@startuml
+actor "Service de planification" as Planif
+participant IHM
+participant ReservationService
+participant ReservationRepository
+database DB
+
+Planif -> IHM : lancer annulation
+IHM -> ReservationService : annulerNonPayees()
+
+ReservationService -> ReservationRepository : findNonPayees()
+ReservationRepository -> DB : SELECT reservations
+DB --> ReservationRepository : liste
+
+loop pour chaque réservation
+  ReservationService -> ReservationRepository : updateStatut(annulée)
+end
+
+ReservationService --> IHM : confirmation
+IHM --> Planif : affichage résultat
+@enduml
+`},
+
+{sprint:'s1',title:"Séquence - Affectation d’un avion",sub:"Sequence . Fig  6.6",card:"Affectation d’un avion",code:`
+@startuml
+actor "Service de planification" as Planif
+participant IHM
+participant VolService
+participant AvionRepository
+database DB
+
+Planif -> IHM : choisir avion
+IHM -> VolService : affecterAvion(vol, avion)
+
+VolService -> AvionRepository : vérifierDisponibilité(avion)
+AvionRepository -> DB : SELECT avion
+DB --> AvionRepository : avion
+
+alt disponible
+  VolService -> DB : update vol.avion
+  VolService --> IHM : succès
+else indisponible
+  VolService --> IHM : erreur
+end
+
+IHM --> Planif : résultat
+@enduml
+`},
+
+{sprint:'s1',title:"Séquence — Affectation des comptoirs",sub:"Sequence · Affectation des comptoirs",card:"SÉQUENCE — Affectation des comptoirs",code:`
+@startuml
+actor "Service de planification" as Planif
+participant IHM
+participant ComptoirService
+participant ComptoirRepository
+database DB
+
+Planif -> IHM : affecter comptoirs
+IHM -> ComptoirService : assignerComptoir(vol)
+
+ComptoirService -> ComptoirRepository : getDisponibles()
+ComptoirRepository -> DB : SELECT comptoirs
+DB --> ComptoirRepository : liste
+
+ComptoirService -> DB : associer comptoir au vol
+ComptoirService --> IHM : confirmation
+
+IHM --> Planif : affichage
+@enduml`},
+
+{sprint:'s1',title:"Séquence — Démarrage de l’enregistrement",sub:"Sequence.Démarrage de l’enregistrement",card:"SÉQUENCE — Démarrage de l’enregistrement",code:`
+@startuml
+actor "Agent de comptoir" as Agent
+participant IHM
+participant VolService
+database DB
+
+Agent -> IHM : démarrer enregistrement
+IHM -> VolService : ouvrirEnregistrement(vol)
+
+VolService -> DB : update statut = "ouvert"
+VolService --> IHM : confirmation
+
+IHM --> Agent : enregistrement démarré
+@enduml
+`},
+//---------------------------------------------------------------------------------------------------------
+
+{sprint:'s2',title:"UC raffiné — Sprint 2",sub:"Use Case · Sprint 2",card:"Gestion ressources humaines + organisation",code:`
+@startuml
+left to right direction
+
+actor "Service de planification" as Planif
+
+rectangle "Sprint 2 - Système" {
+
+  (Gérer liste d’attente) as UC1
+  (Affecter équipage) as UC2
+  (Affecter agents de comptoir) as UC3
+  (Notifier parties concernées) as UC4
+
+  UC1 --> UC4 : <<include>>
+  UC2 --> UC4 : <<include>>
+  UC3 --> UC4 : <<include>>
+}
+Planif --> UC1
+Planif --> UC2
+Planif --> UC3
+Planif --> UC4
+@enduml
+`},
+
+{sprint:'s2',title:"Classes raffinées — Sprint 2",sub:"Class Diagram · Sprint 2",card:"CLASSES RAFFINÉES — SPRINT 2",code:`
+@startuml
+class Vol {
+  id
+  statut
+}
+class Reservation {
+  id
+  statut
+}
+class ListeAttente {
+  priorité
+}
+class Equipage {
+  id
+  type
+}
+class Agent {
+  id
+  nom
+}
+class Notification {
+  id
+  message
+  date
+}
+class NotificationService {
+  +envoyer()
+}
+' ================= RELATIONS =================
+Vol "1" --> "0..*" Reservation
+Vol "1" --> "0..*" ListeAttente
+Vol "1" --> "1..*" Equipage : affecte
+Vol "1" --> "1..*" Agent : utilise
+NotificationService "1" --> "0..*" Notification : génère
+Notification --> "1" Vol : concerne
+@enduml
+`},
+
+{sprint:'s2',title:"Séquence — Gestion de la liste d’attente",sub:"Sequence ·Gestion de la liste d’attente",card:"SÉQUENCE — AGestion de la liste d’attente",code:`
+@startuml
+actor Planif
+participant IHM
+participant ListeAttenteService
+participant ReservationRepository
+database DB
+
+Planif -> IHM : gérer liste attente
+IHM -> ListeAttenteService : traiterListe()
+
+ListeAttenteService -> ReservationRepository : getPlacesLibres()
+ReservationRepository -> DB : SELECT
+
+ListeAttenteService -> DB : affecter places
+
+ListeAttenteService --> IHM : résultat
+IHM --> Planif : affichage
+@enduml
+`},
+
+{sprint:'s2',title:"Séquence — Affectation équipage",sub:"Sequence · Affectation équipage",card:"SÉQUENCE — Affectation équipage",code:`
+@startuml
+actor Planif
+participant IHM
+participant EquipageService
+participant EquipageRepository
+database DB
+
+Planif -> IHM : affecter équipage
+IHM -> EquipageService : assignerEquipage(vol)
+
+EquipageService -> EquipageRepository : getDisponibles()
+EquipageRepository -> DB : SELECT
+
+EquipageService -> DB : associer équipage
+
+EquipageService --> IHM : confirmation
+IHM --> Planif : résultat
+@enduml
+`},
+
+{sprint:'s2',title:"Affectation agents de comptoir",sub:"Affectation agents de comptoir",card:"Affectation agents de comptoir ",code:`
+@startuml
+actor Planif
+participant IHM
+participant AgentService
+participant AgentRepository
+database DB
+
+Planif -> IHM : affecter agents
+IHM -> AgentService : assignerAgents(vol)
+
+AgentService -> AgentRepository : getDisponibles()
+AgentRepository -> DB : SELECT
+
+AgentService -> DB : affectation agents
+
+AgentService --> IHM : confirmation
+IHM --> Planif : affichage
+@enduml
+`},
+{sprint:'s2',title:"Séquence —  Notification des parties",sub:"Sequence ·  Notification des parties",card:"SÉQUENCE —  Notification des parties",code:`
+@startuml
+actor Planif
+participant IHM
+participant NotificationService
+database DB
+
+Planif -> IHM : notifier parties
+IHM -> NotificationService : envoyerNotifications()
+
+NotificationService -> DB : enregistrer notification
+NotificationService --> IHM : confirmation
+
+IHM --> Planif : notification envoyée
+@enduml
+`},
+//------------------------------------------------------------------------------------------------------------
+{sprint:'s3',title:"UC raffiné — Sprint 3",sub:"Use Case · Sprint 3",card:"Cœur métier (check-in passager)",code:`
+@startuml
+left to right direction
+actor "Agent de comptoir" as Agent
+rectangle "Sprint 3 - Système" {
+
+  (Vérifier documents) as UC1
+  (Vérifier présence sur liste) as UC2
+  (Affecter siège) as UC3
+  (Éditer carte d’embarquement) as UC4
+
+  UC2 --> UC3 : <<include>>
+  UC3 --> UC4 : <<include>>
+}
+Agent --> UC1
+Agent --> UC2
+Agent --> UC3
+Agent --> UC4
+@enduml
+`},
+{sprint:'s3',title:"Classes raffinées — Sprint 3",sub:"Class Diagram · Sprint 3",card:"CLASSES RAFFINÉES — SPRINT 3",code:`
+@startuml
+class Passager {
+  id
+  nom
+  type
+}
+class Reservation {
+  id
+  statut
+}
+class Vol {
+  id
+}
+class Siege {
+  numero
+  classe
+}
+class CarteEmbarquement {
+  code
+  date
+}
+class Agent {
+  id
+  nom
+}
+' ================= RELATIONS =================
+Passager "1" --> "1" Reservation
+Reservation "1" --> "1" Vol
+Vol "1" --> "0..*" Siege
+Passager "1" --> "0..1" Siege : occupe
+Passager "1" --> "0..1" CarteEmbarquement : reçoit
+CarteEmbarquement --> "1" Vol
+Agent "1" --> "0..*" Passager : enregistre
+@enduml
+`},
+{sprint:'s3',title:"Séquence — Vérification des documents",sub:"Sequence ·Vérification des documents",card:"SÉQUENCE — Vérification des documents",code:`
+@startuml
+actor Agent
+participant IHM
+participant VerificationService
+database DB
+Agent -> IHM : saisir documents
+IHM -> VerificationService : verifierDocuments()
+VerificationService -> DB : consulter données passager
+DB --> VerificationService : données
+alt documents valides
+  VerificationService --> IHM : OK
+else invalides
+  VerificationService --> IHM : erreur
+end
+IHM --> Agent : résultat
+@enduml
+`},
+{sprint:'s3',title:"Séquence — Vérification présence sur liste",sub:"Sequence ·Vérification présence sur listes",card:"SÉQUENCE —Vérification présence sur liste",code:`
+@startuml
+actor Agent
+participant IHM
+participant ReservationService
+database DB
+
+Agent -> IHM : vérifier passager
+IHM -> ReservationService : checkPresence()
+
+ReservationService -> DB : rechercher passager
+DB --> ReservationService : résultat
+
+ReservationService --> IHM : confirmé / refusé
+IHM --> Agent : affichage
+@enduml
+
+`},
+{sprint:'s3',title:"Séquence —  Affectation d’un siège",sub:"Sequence · Affectation d’un siège",card:"SÉQUENCE —  Affectation d’un siège",code:`
+@startuml
+actor Agent
+participant IHM
+participant SiegeService
+database DB
+Agent -> IHM : attribuer siège
+IHM -> SiegeService : assignerSiege()
+SiegeService -> DB : vérifier disponibilité
+DB --> SiegeService : siège libre
+SiegeService -> DB : associer siège au passager
+SiegeService --> IHM : confirmation
+IHM --> Agent : siège attribué
+@enduml
+`},
+{sprint:'s3',title:"Séquence — Génération carte d’embarquement",sub:"Sequence ·Génération carte d’embarquement",card:"SÉQUENCE — Génération carte d’embarquement",code:`
+@startuml
+actor Agent
+participant IHM
+participant CarteService
+database DB
+Agent -> IHM : générer carte
+IHM -> CarteService : creerCarte()
+CarteService -> DB : enregistrer carte
+CarteService --> IHM : carte générée
+IHM --> Agent : afficher/imprimer
+@enduml
+`},
+//------------------------------------------------------------------------------------------------------------
+{sprint:'s4',title:"UC raffiné — Sprint 4",sub:"Use Case · Sprint 4",card:"Gestion logistique + visibilité",code:`
+@startuml
+left to right direction
+
+actor "Agent de comptoir" as Agent
+actor "Service de planification" as Planif
+
+rectangle "Sprint 4 - Système" {
+
+  (Afficher comptoirs) as UC1
+  (Peser bagages) as UC2
+  (Générer étiquettes bagages) as UC3
+  (Acheminer bagages) as UC4
+  (Évaluer passagers) as UC5
+
+  UC2 --> UC3 : <<include>>
+  UC3 --> UC4 : <<include>>
+}
+Agent --> UC2
+Agent --> UC3
+Planif --> UC5
+UC1 --> Agent
+@enduml
+
+`},
+{sprint:'s4',title:"Classes raffinées — Sprint 4",sub:"Class Diagram · Sprint 4",card:"CLASSES RAFFINÉES — SPRINT 4",code:`
+@startuml
+
+class Passager {
+  id
+  nom
+}
+
+class Bagage {
+  id
+  poids
+  statut
+}
+
+class Etiquette {
+  code
+}
+
+class Vol {
+  id
+}
+
+class Comptoir {
+  id
+  statut
+}
+
+class Rapport {
+  id
+  type
+}
+' ================= RELATIONS =================
+Passager "1" --> "0..*" Bagage : possède
+Bagage "1" --> "1" Etiquette : identifié par
+Bagage --> "1" Vol : associé à
+Vol "1" --> "1..*" Comptoir : utilise
+Rapport --> "1" Vol : concerne
+@enduml
+`},
+{sprint:'s4',title:"Séquence — Pesée des bagages",sub:"Sequence ·Pesée des bagages",card:"SÉQUENCE — Pesée des bagages",code:`
+@startuml
+actor Agent
+participant IHM
+participant BagageService
+database DB
+
+Agent -> IHM : saisir poids bagage
+IHM -> BagageService : enregistrerPoids()
+
+BagageService -> DB : sauvegarder poids
+BagageService --> IHM : confirmation
+
+IHM --> Agent : poids validé
+@enduml
+`},
+{sprint:'s4',title:"Séquence — Génération étiquette bagage",sub:"Sequence ·Génération étiquette bagage",card:"SÉQUENCE —Génération étiquette bagage",code:`
+@startuml
+actor Agent
+participant IHM
+participant EtiquetteService
+database DB
+
+Agent -> IHM : générer étiquette
+IHM -> EtiquetteService : creerEtiquette()
+
+EtiquetteService -> DB : enregistrer étiquette
+EtiquetteService --> IHM : étiquette générée
+
+IHM --> Agent : impression
+@enduml
+`},
+{sprint:'s4',title:"Séquence —  Acheminement bagages",sub:"Sequence ·Acheminement bagages",card:"SÉQUENCE —  Acheminement bagages",code:`
+@startuml
+actor Agent
+participant IHM
+participant BagageService
+database DB
+
+Agent -> IHM : envoyer bagage
+IHM -> BagageService : acheminer()
+
+BagageService -> DB : update statut
+BagageService --> IHM : confirmation
+
+IHM --> Agent : bagage envoyé
+@enduml
+
+`},
+{sprint:'s4',title:"Séquence —  Affichage des comptoirs",sub:"Sequence ·Affichage des comptoirs",card:"SÉQUENCE —  Affichage des comptoirs",code:`
+@startuml
+actor "Système" as Sys
+participant IHM
+participant VolService
+database DB
+
+Sys -> VolService : récupérer comptoirs
+VolService -> DB : SELECT comptoirs
+DB --> VolService : liste
+
+VolService --> IHM : afficher comptoirs
+@enduml 
+`},
+{sprint:'s4',title:"Séquence —  Évaluation des passagerss",sub:"Sequence ·Évaluation des passagers",card:"SÉQUENCE —  Évaluation des passagers",code:`
+@startuml
+actor Planif
+participant IHM
+participant StatService
+database DB
+
+Planif -> IHM : demander statistiques
+IHM -> StatService : calculer()
+
+StatService -> DB : récupérer données
+DB --> StatService : données
+
+StatService --> IHM : rapport
+IHM --> Planif : affichage
+@enduml
+`},
+//------------------------------------------------------------------------------------------------------------
+{sprint:'s5',title:"UC raffiné — Sprint 5",sub:"Use Case · Sprint 5",card:"Optimisation finale avant départ",code:`
+@startuml
+left to right direction
+
+actor "Agent de comptoir" as Agent
+actor "Système" as Sys
+
+rectangle "Sprint 5 - Système" {
+
+  (Admettre passagers liste d’attente) as UC1
+  (Attribuer places disponibles) as UC2
+  (Mettre à jour liste passagers) as UC3
+
+  UC1 --> UC2 : <<include>>
+  UC2 --> UC3 : <<include>>
+}
+
+Agent --> UC1
+Sys --> UC2
+Sys --> UC3
+
+@enduml
+
+
+`},
+{sprint:'s5',title:"Classes raffinées — Sprint 5",sub:"Class Diagram · Sprint 5",card:"CLASSES RAFFINÉES — SPRINT 5",code:`
+@startuml
+
+class Passager {
+  id
+  nom
+  priorité
+}
+
+class ListeAttente {
+  rang
+}
+
+class Siege {
+  numero
+  statut
+}
+
+class Vol {
+  id
+}
+
+class Reservation {
+  statut
+}
+
+' ================= RELATIONS =================
+
+Passager "1" --> "0..1" ListeAttente : appartient à
+
+ListeAttente "1" --> "0..*" Passager : contient
+
+Vol "1" --> "0..*" Siege : possède
+
+Passager "1" --> "0..1" Siege : occupe
+
+Reservation "1" --> "1" Vol
+Passager "1" --> "1" Reservation
+
+@enduml
+`},
+{sprint:'s5',title:"Séquence — Admission liste d’attente",sub:"Sequence ·Admission liste d’attente",card:"SÉQUENCE — Admission liste d’attente",code:`
+@startuml
+actor Agent
+participant IHM
+participant ListeAttenteService
+database DB
+
+Agent -> IHM : lancer admission
+IHM -> ListeAttenteService : admettre()
+
+ListeAttenteService -> DB : récupérer liste
+DB --> ListeAttenteService : passagers
+
+ListeAttenteService --> IHM : liste triée
+IHM --> Agent : affichage
+@enduml
+`},
+{sprint:'s5',title:"Attribution des places",sub:"Sequence ·Attribution des places",card:"SÉQUENCE —Attribution des places",code:`
+@startuml
+actor "Système" as Sys
+participant ListeAttenteService
+participant SiegeService
+database DB
+
+Sys -> ListeAttenteService : traiterListe()
+
+ListeAttenteService -> SiegeService : demander sièges dispo
+SiegeService -> DB : SELECT sièges libres
+DB --> SiegeService : liste
+
+loop pour chaque passager
+  ListeAttenteService -> DB : assigner siège
+end
+
+ListeAttenteService --> Sys : résultat
+@enduml
+`},
+{sprint:'s5',title:"Séquence — Mise à jour des passagers",sub:"Sequence ·Mise à jour des passagers",card:"SÉQUENCE — Mise à jour des passagers",code:`
+@startuml
+actor "Système" as Sys
+participant ReservationService
+database DB
+
+Sys -> ReservationService : updateStatut()
+
+ReservationService -> DB : modifier statut passager
+ReservationService --> Sys : confirmation
+@enduml
+`},
+];
+
+/* ── STATE ── */
+const SDOT={conception:'sa-conception',s1:'sa-s1',s2:'sa-s2',s3:'sa-s3',s4:'sa-s4'};
+let cur=0,zoom=1,fszoom=1,editorOpen=false;
+const orig=D.map(d=>d.code);
+document.getElementById('diag-count').textContent=D.length+' diagrammes';
+
+/* ── RENDER ── */
+function renderDiagram(code,outputId,titleId,cardTitle){
+  const out=document.getElementById(outputId);
+  out.innerHTML='<div id="loading"><div class="spinner"></div>Génération PlantUML…</div>';
+  const url=pumlURL(code);
+  const img=new Image();
+  img.onload=()=>{
+    out.innerHTML='';
+    img.style.maxWidth='100%';
+    img.style.borderRadius='4px';
+    out.appendChild(img);
+    if(titleId)document.getElementById(titleId).textContent=cardTitle;
+    if(outputId==='diag-output')applyZoom();
+    else applyFsZoom();
+  };
+  img.onerror=()=>{
+    out.innerHTML='<div class="err-msg">❌ Erreur de rendu.\nVérifiez votre connexion ou la syntaxe PlantUML.</div>';
+  };
+  img.src=url;
+}
+
+/* ── ZOOM ── */
+function applyZoom(){const i=document.querySelector('#diag-output img');if(i){i.style.transformOrigin='top center';i.style.transform='scale('+zoom+')';}}
+function applyFsZoom(){const i=document.querySelector('#fs-output img');if(i){i.style.transformOrigin='top center';i.style.transform='scale('+fszoom+')';}}
+function zoomIn(){zoom=Math.min(3,zoom+.15);applyZoom();}
+function zoomOut(){zoom=Math.max(.3,zoom-.15);applyZoom();}
+function zoomReset(){zoom=1;applyZoom();}
+function fszoomIn(){fszoom=Math.min(3,fszoom+.15);applyFsZoom();}
+function fszoomOut(){fszoom=Math.max(.3,fszoom-.15);applyFsZoom();}
+function fszoomReset(){fszoom=1;applyFsZoom();}
+
+/* ── LOAD ── */
+function loadDiagram(i){
+  cur=i;const d=D[i];
+  document.querySelectorAll('.diag-item').forEach((el,j)=>el.classList.toggle('active',j===i));
+  document.getElementById('tb-dot').className='sprint-accent '+(SDOT[d.sprint]||'sa-conception');
+  document.getElementById('tb-title').textContent=d.title;
+  document.getElementById('tb-type').textContent=d.sub;
+  document.getElementById('editor').value=d.code;
+  zoom=1;
+  renderDiagram(d.code,'diag-output','diag-card-title',d.card);
+}
+
+/* ── EDITOR TOGGLE ── */
+function toggleEditor(){
+  editorOpen=!editorOpen;
+  const p=document.getElementById('editor-panel');
+  const b=document.getElementById('editor-btn');
+  if(editorOpen){p.classList.add('open');b.classList.add('active');b.textContent='✕ Fermer éditeur';}
+  else{p.classList.remove('open');b.classList.remove('active');b.textContent='✏️ Éditeur';}
+}
+
+function renderEditor(){
+  const code=document.getElementById('editor').value.trim();
+  if(!code)return;
+  D[cur].code=code;zoom=1;
+  renderDiagram(code,'diag-output','diag-card-title',D[cur].card);
+  toast('Diagramme mis à jour');
+}
+
+function resetDiagram(){
+  D[cur].code=orig[cur];
+  document.getElementById('editor').value=orig[cur];
+  zoom=1;
+  renderDiagram(orig[cur],'diag-output','diag-card-title',D[cur].card);
+  toast('Réinitialisé');
+}
+
+function copyCode(){
+  navigator.clipboard.writeText(document.getElementById('editor').value);
+  toast('Code PlantUML copié');
+}
+
+/* ── FULLSCREEN ── */
+function openFullscreen(){
+  const d=D[cur];
+  document.getElementById('fs-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  document.getElementById('fs-label').textContent=d.title;
+  document.getElementById('fs-sub').textContent=d.sub;
+  document.getElementById('fs-title').textContent=d.card;
+  document.getElementById('fs-dot').className='sprint-accent '+(SDOT[d.sprint]||'sa-conception');
+  fszoom=1;
+  renderDiagram(D[cur].code,'fs-output','fs-title',d.card);
+}
+
+function closeFullscreen(){
+  document.getElementById('fs-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+/* ── EXPORT PNG ── */
+function exportPNG(fromFs=false){
+  const img=document.querySelector(fromFs?'#fs-output img':'#diag-output img');
+  if(!img){toast('Aucune image à exporter');return;}
+  const a=document.createElement('a');
+  a.href=img.src;
+  a.download='ADISON_'+D[cur].title.replace(/[\s\/—]+/g,'_')+'.png';
+  a.click();
+  toast('Export PNG téléchargé');
+}
+
+/* ── TOAST ── */
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* ── KEYBOARD ── */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeFullscreen();
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();renderEditor();}
+});
+
+loadDiagram(0);
+</script>
+</body>
+</html>
